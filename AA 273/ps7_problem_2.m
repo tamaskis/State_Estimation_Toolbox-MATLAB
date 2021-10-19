@@ -556,3 +556,91 @@ function C = measurement_jacobian(x,t,i_closest)
          C3   C4];
     
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%==========================================================================
+% State transition matrix.
+%--------------------------------------------------------------------------
+%
+% -------
+% INPUTS:
+% -------
+%   x       - (4×1) state vector
+%   u       - (2×1) control input
+%   t    	- (1×1) current iteration (corresponding to discrete time)
+%   dt      - (1×1) time step
+%
+% --------
+% OUTPUTS:
+% --------
+%   A       - (4×4) state transition matrix
+%
+%==========================================================================
+function A = state_transition_matrix(x,u,t,dt)
+    A = [eye(2),eye(2)*dt;zeros(2),eye(2)];
+end
+
+
+
+%==========================================================================
+% Input matrix.
+%--------------------------------------------------------------------------
+%
+% -------
+% INPUTS:
+% -------
+%   x       - (4×1) state vector
+%   u       - (2×1) control input
+%   t    	- (1×1) current iteration (corresponding to discrete time)
+%   dt      - (1×1) time step
+%
+% --------
+% OUTPUTS:
+% --------
+%   B       - (4×2) input matrix
+%
+%==========================================================================
+function B = input_matrix(x,u,t,dt)
+    B = [zeros(2);eye(2)*dt];
+end
+
+
+
+%==========================================================================
+% Observation matrix.
+%--------------------------------------------------------------------------
+%
+% -------
+% INPUTS:
+% -------
+%   x       - (4×1) state vector
+%   u       - (2×1) control input
+%   t    	- (1×1) current iteration (corresponding to discrete time)
+%
+% --------
+% OUTPUTS:
+% --------
+%   C   	- (4×2) observation matrix
+%
+%==========================================================================
+function C = observation_matrix(x,u,t)
+    C = [eye(2),zeros(2)];
+end

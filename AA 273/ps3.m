@@ -1,112 +1,91 @@
-%-------------------------------------------------------------------------%
-
-% TAMAS KIS
-
-% AA 273 - State Estimation and Filtering for Robotic Perception
+%% ps3
 % Problem Set 3
-
-%-------------------------------------------------------------------------%
+% AA 273 - State Estimation and Filtering for Robotic Perception
+%
+% Author: Tamas Kis
+% Last Update: 2021-08-18
 
 
 
 %% SCRIPT SETUP
 
-% clears variables and command window, closes all figures
-clear;
-clc;
-close all;
+% clears Workspace and Command Window, closes all figures
+clear;clc;close all;
 
-% adds path to Estimation Toolbox
-addpath("..");
+% adds path to root directory and all subdirectories
+addpath(genpath("../"));
 
-% plot parameters
-plot_position = [540,300,700,500]; % plot position [x,y,l,w]
-line_width = 1.5; % line width [#]
-axis_font_size = 18; % axis label font size [#]
-legend_font_size = 14; % legend font size [#]
-cardinal_red = [140,21,21]/255; % color for plots [rgb]
+% loads plot parameters
+pp = PLOT_PARAMETERS;
+
+% random seed
+seed = 2;
 
 
 
-%% PROBLEM 2(b)
-
-% initial condition
-p0 = [1000;0]; % position [m]
-s0 = [0;50]; % velocity [m/s]
-x0 = [p0;s0]; % state vector
+%% PROBLEM 2
 
 % time parameters
-dt = 1; % time step [s]
-tf = 10; % simulation end time [s]
-
-% time vector and its length
-t = 0:dt:tf;
-T = length(t);
+dt = 1;         % time step [s]
+tf = 10;        % simulation end time [s]
+t = 0:dt:tf;    % time vector [s]
+T = length(t);  % length of time vector
 
 % system matrices
-A = [eye(2),eye(2)*dt;zeros(2),eye(2)];
-B = [zeros(2);eye(2)*dt];
-C = [eye(2),zeros(2)];
+A = @(x,u,t) [eye(2),eye(2)*dt;zeros(2),eye(2)];
+B = @(x,u,t) [zeros(2);eye(2)*dt];
+C = @(x,t) [eye(2),zeros(2)];
 
-% dimension parameters
-n = size(A,1);
-k = size(C,1);
+% state (n) and measurement (m) dimensions
+n = 4;
+m = 2;
 
-% noise covariances
-Q = eye(2);
-R = 9*eye(k);
+% process (Q) and measurement (R) noise covariances
+Q = [zeros(2),zeros(2);zeros(2),eye(2)];
+R = 9*eye(m);
 
-% simulated noise
-w = gaussian_random_sample(zeros(2,1),Q,T-1);
-v = gaussian_random_sample(zeros(2,1),R,T-1);
-
-% control signal
+% control input
 u = [-2.5*cos(0.05*t);-2.5*sin(0.05*t)];
+ 
+% initial prior distribution (i.e. initial state estimate and covariance)
+mu0 = [1500;100;0;55];
+Sigma0 = [250000*eye(2),zeros(2);zeros(2),eye(2)];
 
-% array preallocation
-x = zeros(n,T);
-y = zeros(k,T);
+% ground truth initial condition
+p0 = [1000;0];  % position [m]
+s0 = [0;50];    % velocity [m/s]
+x0 = [p0;s0];   % state vector
 
-% stores initial condition
-x(:,1) = x0;
+% initial condition structure for simulation
+IC.x0_true = x0;
 
-% simulation
-for tt = 1:(T-1)
-    x(:,tt+1) = A*x(:,tt)+B*u(:,tt)+[0;0;w(:,tt)];
-    y(:,tt+1) = C*x(:,tt+1)+v(:,tt);
-end
+% ground truth simulation
+[x,y] = simulate_linear(A,B,C,Q,R,u,IC,seed);
 
 % state trajectory with measurement
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
-plot(x(1,:),x(2,:),'color',cardinal_red,'linewidth',line_width);
-plot(y(1,2:end),y(2,2:end),'k:','linewidth',line_width);
+plot(x(1,:),x(2,:),'color',pp.cardinal_red,'linewidth',pp.line_width);
+plot(y(1,2:end),y(2,2:end),'k:','linewidth',pp.line_width);
 hold off;
 grid on;
 xlabel('$p_{1}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 ylabel('$p_{2}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 legend('true trajectory, $\mathbf{p}$',...
     'position measurement, $\mathbf{y}$','interpreter','latex',...
-    'fontsize',legend_font_size);
+    'fontsize',pp.legend_font_size);
 
 
 
 %% PROBLEM 3
 
-% initial state estimate
-mu0 = [1500;100;0;55];
-Sigma0 = [250000*eye(2),zeros(2);zeros(2),eye(2)];
-
-% updates process noise covariance to Q'
-Q = [zeros(2),zeros(2);zeros(2),eye(2)];
-
 % runs Kalman filter
-[mu,Sigma] = KF(A,B,C,Q,R,u,y,mu0,Sigma0);
+[mu,Sigma] = KF(A,B,C,Q,R,t,u,y,mu0,Sigma0);
 
 % plots estimated trajectory with position error ellipses (part (b))
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
 for i = 2:length(t)
     [x_ellipse,y_ellipse] = error_ellipse(mu(1:2,i),Sigma(1:2,1:2,i),0.95);
@@ -118,21 +97,22 @@ for i = 2:length(t)
             'edgecolor','none','handlevisibility','off');
     end
 end
-plot(x(1,:),x(2,:),'k:','linewidth',line_width);
-plot(mu(1,2:end),mu(2,2:end),'linewidth',line_width,'color',cardinal_red);
+plot(x(1,:),x(2,:),'k:','linewidth',pp.line_width);
+plot(mu(1,2:end),mu(2,2:end),'linewidth',pp.line_width,'color',...
+    pp.cardinal_red);
 hold off;
 grid on;
 xlabel('$p_{1}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 ylabel('$p_{2}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 legend('error ellipses for position estimate','true trajectory',...
     'position estimate','interpreter','latex','fontsize',...
-    legend_font_size,'location','best');
+    pp.legend_font_size,'location','best');
 
 
 % plots true trajectory with velocity + velocity error ellipses (part (c))
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
 for i = 2:length(t)
     [x_ellipse,y_ellipse] = error_ellipse(mu(3:4,i),Sigma(3:4,3:4,i),0.95);
@@ -141,47 +121,44 @@ for i = 2:length(t)
     if i == length(t)
         fill(x_ellipse,y_ellipse,'','facecolor',[0.75,0.75,0.75],...
             'edgecolor','none');
-        plot(x(1,:),x(2,:),'k:','linewidth',line_width);
+        plot(x(1,:),x(2,:),'k:','linewidth',pp.line_width);
         quiver(x(1,i),x(2,i),(10/9)*mu(3,i),(10/9)*mu(4,i),'linewidth',...
-            line_width,'color',cardinal_red);
+            pp.line_width,'color',pp.cardinal_red);
     else
         fill(x_ellipse,y_ellipse,'','facecolor',[0.75,0.75,0.75],...
             'edgecolor','none','handlevisibility','off');
         quiver(x(1,i),x(2,i),(10/9)*mu(3,i),(10/9)*mu(4,i),'linewidth',...
-            line_width,'color',cardinal_red,'handlevisibility','off');
+            pp.line_width,'color',pp.cardinal_red,'handlevisibility',...
+            'off');
     end
 end
 hold off;
 grid on;
 xlabel('$p_{1}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 ylabel('$p_{2}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 legend('error ellipses for velocity estimate','true trajectory',...
     'velocity estimate','interpreter','latex','fontsize',...
-    legend_font_size,'location','best');
+    pp.legend_font_size,'location','best');
 
 
 
 %% PROBLEM 4
 
-% update C matrix
-C = [zeros(2),eye(2)];
+% updated observation matrix
+C = @(x,t) [zeros(2),eye(2)];
 
-% new measurement simulation
-for tt = 1:(T-1)
-    y(:,tt+1) = C*x(:,tt+1)+v(:,tt);
-end
-
-% initial state estimate
+% updated initial prior distribution
 mu0 = [1000;0;0;50];
 Sigma0 = [eye(2),zeros(2);zeros(2),eye(2)];
 
-% runs Kalman filter
-[mu,Sigma] = KF(A,B,C,Q,R,u,y,mu0,Sigma0);
+% runs ground truth simulation + Kalman filter
+[x,y] = simulate_linear(A,B,C,Q,R,u,IC,seed);
+[mu,Sigma] = KF(A,B,C,Q,R,t,u,y,mu0,Sigma0);
 
 % plots estimated trajectory with position error ellipses
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
 for i = 2:length(t)
     [x_ellipse,y_ellipse] = error_ellipse(mu(1:2,i),Sigma(1:2,1:2,i),0.95);
@@ -193,22 +170,21 @@ for i = 2:length(t)
             'edgecolor','none','handlevisibility','off');
     end
 end
-plot(x(1,:),x(2,:),'k:','linewidth',line_width);
-plot(mu(1,2:end),mu(2,2:end),'linewidth',line_width,'color',cardinal_red);
+plot(x(1,:),x(2,:),'k:','linewidth',pp.line_width);
+plot(mu(1,2:end),mu(2,2:end),'linewidth',pp.line_width,'color',...
+    pp.cardinal_red);
 hold off;
 grid on;
 xlabel('$p_{1}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 ylabel('$p_{2}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 legend('error ellipses for position estimate','true trajectory',...
     'position estimate','interpreter','latex','fontsize',...
-    legend_font_size,'location','best');
-
-
+    pp.legend_font_size,'location','best');
 
 % plots true trajectory with velocity + velocity error ellipses
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
 for i = 2:length(t)
     [x_ellipse,y_ellipse] = error_ellipse(mu(3:4,i),Sigma(3:4,3:4,i),0.95);
@@ -217,22 +193,23 @@ for i = 2:length(t)
     if i == length(t)
         fill(x_ellipse,y_ellipse,'','facecolor',[0.75,0.75,0.75],...
             'edgecolor','none');
-        plot(x(1,:),x(2,:),'k:','linewidth',line_width);
+        plot(x(1,:),x(2,:),'k:','linewidth',pp.line_width);
         quiver(x(1,i),x(2,i),(10/9)*mu(3,i),(10/9)*mu(4,i),'linewidth',...
-            line_width,'color',cardinal_red);
+            pp.line_width,'color',pp.cardinal_red);
     else
         fill(x_ellipse,y_ellipse,'','facecolor',[0.75,0.75,0.75],...
             'edgecolor','none','handlevisibility','off');
         quiver(x(1,i),x(2,i),(10/9)*mu(3,i),(10/9)*mu(4,i),'linewidth',...
-            line_width,'color',cardinal_red,'handlevisibility','off');
+            pp.line_width,'color',pp.cardinal_red,'handlevisibility',...
+            'off');
     end
 end
 hold off;
 grid on;
 xlabel('$p_{1}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 ylabel('$p_{2}\;[\mathrm{m}]$','interpreter','latex','fontsize',...
-    axis_font_size);
+    pp.axis_font_size);
 legend('error ellipses for velocity estimate','true trajectory',...
     'velocity estimate','interpreter','latex','fontsize',...
-    legend_font_size,'location','best');
+    pp.legend_font_size,'location','best');

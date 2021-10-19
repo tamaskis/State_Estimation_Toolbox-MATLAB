@@ -1,30 +1,22 @@
-%-------------------------------------------------------------------------%
-
-% TAMAS KIS
-
+%% ps2_problem_5
+% Problem Set 2, Problem 5
 % AA 273 - State Estimation and Filtering for Robotic Perception
-% Problem Set 2 - Problem 5
-
-%-------------------------------------------------------------------------%
+%
+% Author: Tamas Kis
+% Last Update: 2021-08-18
 
 
 
 %% SCRIPT SETUP
 
-% clears variables and command window, closes all figures
-clear;
-clc;
-close all;
+% clears Workspace and Command Window, closes all figures
+clear; clc; close all;
 
-% adds path to Estimation Toolbox
-addpath("..");
+% adds path to root directory and all subdirectories
+addpath(genpath("../"));
 
-% plot parameters
-plot_position = [540,300,700,500]; % plot position [x,y,l,w]
-line_width = 1.5; % line width [#]
-axis_font_size = 18; % axis label font size [#]
-legend_font_size = 14; % legend font size [#]
-cardinal_red = [140,21,21]/255; % color for plots [rgb]
+% loads plot parameters
+pp = PLOT_PARAMETERS;
 
 
 
@@ -49,12 +41,12 @@ Sigma_xgy = Sigma_xx-Sigma_xy*inv(Sigma_yy)*Sigma_xy'
 [x_posterior,y_posterior] = error_ellipse(mu_xgy,Sigma_xgy,0.95);
 
 % plot
-figure('position',plot_position);
+figure('position',pp.plot_position);
 hold on;
 grid on;
-plot(x_prior,y_prior,'linewidth',line_width);
-plot(x_posterior,y_posterior,'linewidth',line_width);
-xlabel('$x_{1}$','interpreter','latex','fontsize',axis_font_size);
-ylabel('$x_{2}$','interpreter','latex','fontsize',axis_font_size);
+plot(x_prior,y_prior,'linewidth',pp.line_width);
+plot(x_posterior,y_posterior,'linewidth',pp.line_width);
+xlabel('$x_{1}$','interpreter','latex','fontsize',pp.axis_font_size);
+ylabel('$x_{2}$','interpreter','latex','fontsize',pp.axis_font_size);
 legend('prior','posterior','interpreter','latex','fontsize',...
-    legend_font_size,'location','best');
+    pp.legend_font_size,'location','best');

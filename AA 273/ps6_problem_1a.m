@@ -1,26 +1,22 @@
-%-------------------------------------------------------------------------%
-
-% TAMAS KIS
-
+%% ps6_problem_1a
+% Problem Set 6, Problem 1a
 % AA 273 - State Estimation and Filtering for Robotic Perception
-% Problem Set 6 Problem 1a
-
-%-------------------------------------------------------------------------%
+%
+% Author: Tamas Kis
+% Last Update: 2021-08-18
 
 
 
 %% SCRIPT SETUP
 
-% clears variables and command window, closes all figures
-clear;
-clc;
-close all;
+% clears Workspace and Command Window, closes all figures
+clear; clc; close all;
 
-% adds path to Estimation Toolbox
-addpath("..");
+% adds path to root directory and all subdirectories
+addpath(genpath("../"));
 
 % loads plot parameters
-PLOT_PARAMETERS;
+pp = PLOT_PARAMETERS;
 
 % seeds random number generators
 rng(2);
@@ -36,8 +32,8 @@ m3 = [10;10];
 m4 = [0;10];
 
 % time parameters
-dt = 0.1; % time step [s]
-tf = 20; % simulation end time [s]
+dt = 0.1;   % time step [s]
+tf = 20;    % simulation end time [s]
 
 % time vector and its length
 t = 0:dt:tf;
@@ -70,8 +66,8 @@ y = zeros(k,T);
 x(:,1) = gaussian_random_sample(mu0,Sigma0);
 
 % functions for nonlinear dynamics and nonlinear measurements
-f = @(x,u,t) f_discrete(x,u,t,dt);
-g = @(x,t) g_discrete(x,t,m1,m2,m3,m4);
+f = @(x,u,t) discrete_dynamics(x,u,t,dt);
+g = @(x,t) discrete_measurement(x,t,m1,m2,m3,m4);
 
 % simulation
 for tt = 1:(T-1)
@@ -89,7 +85,7 @@ A = @(x,u,t) dynamics_jacobian(x,u,t,dt);
 C = @(x,t) measurement_jacobian(x,t,m1,m2,m3,m4);
 
 % runs EKF
-[mu,Sigma] = EKF(f,g,A,C,Q,R,u,y,mu0,Sigma0);
+[mu,Sigma] = EKF(f,g,A,C,Q,R,t,u,y,mu0,Sigma0);
 
 % +/- 2-sigma bounds
 [lower_bound,upper_bound] = sigma_bounds(mu,Sigma,2);
@@ -153,21 +149,25 @@ legend('true heading angle',...
 
 %% ADDITIONAL FUNCTIONS
 
-%=========================================================================%
-% Discrete-time nonlinear dynamics.
-%=========================================================================%
+%==========================================================================
+% discrete_dynamics  Discrete dynamics equation.
+%--------------------------------------------------------------------------
 %
-% INPUTS:
-%   x       state vector at current time step (3 x 1)
-%   u       control input at current time step (2 x 1)
-%   t       current iteration (corresponding to discrete time)
-%   dt      time step [s]
+% ------
+% INPUT:
+% ------
+%   x       - (3×1 double) state vector at current sample time
+%   u       - (2×1 double) control input at current sample time
+%   t       - (1×1 double) current time [s]
+%   dt      - (1×1 double) time step [s]
 %
-% OUTPUTS:
-%   f_eval  evaluation of f (produces state vector at next time step)
+% -------
+% OUTPUT:
+% -------
+%   x_next  - (3×1 double) state vector at next sample time
 %
-%=========================================================================%
-function f_eval = f_discrete(x,u,t,dt)
+%==========================================================================
+function x_next = discrete_dynamics(x,u,t,dt)
 
     % unpacks state vector
     px = x(1);
@@ -178,55 +178,63 @@ function f_eval = f_discrete(x,u,t,dt)
     nu = u(1);
     phi = u(2);
     
-    % evalutes f(xt,ut)
-    f_eval = [px+nu*cos(theta)*dt;py+nu*sin(theta)*dt;theta+phi*dt];
+    % evalutes f(x,u,t)
+    x_next = [px+nu*cos(theta)*dt;py+nu*sin(theta)*dt;theta+phi*dt];
     
 end
 
 
 
-%=========================================================================%
-% Discrete-time nonlinear measurement.
-%=========================================================================%
+%==========================================================================
+% discrete_measurement  Discrete measurement equation.
+%--------------------------------------------------------------------------
 %
-% INPUTS:
-%   x       state vector at current time step (3 x 1)
-%   t       current iteration (corresponding to discrete time)
-%   m1      feature 1 location (2 x 1)
-%   m2      feature 2 location (2 x 1)
-%   m3      feature 3 location (2 x 1)
-%   m4      feature 4 location (2 x 1)
+% ------
+% INPUT:
+% ------
+%   x       - (3×1 double) state vector
+%   t       - (1×1 double) time [s]
+%   m1      - (2×1 double) feature 1 location
+%   m2      - (2×1 double) feature 2 location
+%   m3      - (2×1 double) feature 3 location
+%   m4      - (2×1 double) feature 4 location
 %
-% OUTPUTS:
-%   g_eval  evaluation of g (produces measurement at current time step)
+% -------
+% OUTPUT:
+% -------
+%   y       - (1×1 double) measurement
 %
-%=========================================================================%
-function g_eval = g_discrete(x,t,m1,m2,m3,m4)
+%==========================================================================
+function g_eval = discrete_measurement(x,t,m1,m2,m3,m4)
 
     % extracts "p" state vector
     p = x(1:2);
     
-    % evalutes g(xt,ut)
+    % evalutes g(x,t)
     g_eval = [norm(m1-p);norm(m2-p);norm(m3-p);norm(m4-p)];
                       
 end
 
 
 
-%=========================================================================%
-% Dynamics Jacobian.
-%=========================================================================%
+%==========================================================================
+% dynamics_jacobian  Dynamics Jacobian.
+%--------------------------------------------------------------------------
 %
-% INPUTS:
-%   x       state vector (3 x 1)
-%   u       control input (2 x 1)
-%   t       current iteration (corresponding to discrete time)
-%   dt      time step [s]
+% ------
+% INPUT:
+% ------
+%   x       - (3×1 double) state vector
+%   u       - (2×1 double) control input
+%   t       - (1×1 double) time [s]
+%   dt      - (1×1 double) time step [s]
 %
-% OUTPUTS:
-%   A       dynamics Jacobian
+% -------
+% OUTPUT:
+% -------
+%   A       - (3×3 double) dynamics Jacobian
 %
-%=========================================================================%
+%==========================================================================
 function A = dynamics_jacobian(x,u,t,dt)
 
     % extracts "theta" from state vector
@@ -244,22 +252,26 @@ end
 
 
 
-%=========================================================================%
-% Measurement Jacobian.
-%=========================================================================%
+%==========================================================================
+% measurement_jacobian  Measurement Jacobian.
+%--------------------------------------------------------------------------
 %
-% INPUTS:
-%   x       state vector (3 x 1)
-%   t       current iteration (corresponding to discrete time)
-%   m1      feature 1 location (2 x 1)
-%   m2      feature 2 location (2 x 1)
-%   m3      feature 3 location (2 x 1)
-%   m4      feature 4 location (2 x 1)
+% ------
+% INPUT:
+% ------
+%   x       - (3×1 double) state vector
+%   t       - (1×1 double) time [s]
+%   m1      - (2×1 double) feature 1 location
+%   m2      - (2×1 double) feature 2 location
+%   m3      - (2×1 double) feature 3 location
+%   m4      - (2×1 double) feature 4 location
 %
-% OUTPUTS:
-%   C       measurement Jacobian
+% -------
+% OUTPUT:
+% -------
+%   C       - (4×3 double) measurement Jacobian
 %
-%=========================================================================%
+%==========================================================================
 function C = measurement_jacobian(x,t,m1,m2,m3,m4)
     
     % x and y position of robot

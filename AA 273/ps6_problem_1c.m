@@ -1,11 +1,9 @@
-%-------------------------------------------------------------------------%
-
-% TAMAS KIS
-
+%% ps6_problem_1c
+% Problem Set 6, Problem 1c
 % AA 273 - State Estimation and Filtering for Robotic Perception
-% Problem Set 6 Problem 1c
-
-%-------------------------------------------------------------------------%
+%
+% Author: Tamas Kis
+% Last Update: 2021-08-18
 
 
 
@@ -20,7 +18,7 @@ close all;
 addpath("..");
 
 % loads plot parameters
-PLOT_PARAMETERS;
+pp = PLOT_PARAMETERS;
 
 % seeds random number generators
 rng(1);
@@ -36,8 +34,8 @@ m3 = [10;10];
 m4 = [0;10];
 
 % time parameters
-dt = 0.1; % time step [s]
-tf = 20; % simulation end time [s]
+dt = 0.1;   % time step [s]
+tf = 20;    % simulation end time [s]
 
 % time vector and its length
 t = 0:dt:tf;

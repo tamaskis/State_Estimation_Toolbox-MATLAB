@@ -1,23 +1,16 @@
-%-------------------------------------------------------------------------%
-
-% TAMAS KIS
-
+%% ps1_problem_4b
+% Problem Set 1, Problem 4b
 % AA 273 - State Estimation and Filtering for Robotic Perception
-% Problem Set 1 - Problem 4b
-
-%-------------------------------------------------------------------------%
+%
+% Author: Tamas Kis
+% Last Update: 2021-08-18
 
 
 
 %% SCRIPT SETUP
 
-% clears variables and command window, closes all figures
-clear;
-clc;
-close all;
-
-% adds path to Estimation Toolbox
-addpath("..");
+% clears Workspace and Command Window, closes all figures
+clear; clc; close all;
 
 
 
