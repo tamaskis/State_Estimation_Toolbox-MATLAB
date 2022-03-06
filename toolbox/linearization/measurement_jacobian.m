@@ -30,5 +30,6 @@
 %
 %==========================================================================
 function Hk = measurement_jacobian(h,xk,k)
-    Hk = ijacobian(@(xk)h(xk,k),xk);
+    %Hk = ijacobian(@(xk)h(xk,k),xk);
+    Hk = ijacobian(@(xk)h(xk,k),xk,1e-20);
 end

@@ -31,5 +31,6 @@
 %
 %==========================================================================
 function Fk = dynamics_jacobian(fd,xk,uk,k)
-    Fk = ijacobian(@(xk)fd(xk,uk,k),xk);
+    %Fk = ijacobian(@(xk)fd(xk,uk,k),xk);
+    Fk = ijacobian(@(xk)fd(xk,uk,k),xk,1e-20);
 end

@@ -34,12 +34,9 @@
 %       • dots   - (1×1 logical) true if state estimate and true state
 %                   should be plotted with dots instead of a line, false
 %                   otherwise (defaults to false)
-%       • error  - (1×1 logical) true if error in state estimate should be
-%                  plotted, false otherwise (defaults to false)
 %       • figure - (1×1 logical) true if new figure should be created,
 %                   false otherwise
 %       • grid   - (1×1 logical) true for grid on, false otherwise
-%                  (defaults to true)
 %       • legend - (1×1 logical) true to include legend, false otherwise
 %                  (defaults to true)
 %       • M      - (1×1 double) number of standard deviations used for
@@ -60,7 +57,7 @@
 %       • xunits - (1×1 string) units of state variable
 %
 %==========================================================================
-function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
+function plot_filter_results(t,x,x_true,x_lower,x_upper,opts)
     %TODO: DOTS VS. LINES
     %TODO: Error only
     %TODO: DOTS FOR ERROR ONLY
@@ -88,14 +85,6 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
         dots = false;
     else
         dots = opts.dots;
-    end
-
-    % determines if state estimate or error in state estimate should be
-    % plotted (defaults to state estimate)
-    if (nargin < 6) || ~isfield(opts,'error')
-        plot_error = false;
-    else
-        plot_error = opts.error;
     end
 
     % determines if new figure should be created (defaults to yes)
@@ -197,40 +186,27 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
     % "light" color
     light_color = (1-color)*0.85+color;
 
-    if plot_error
-        x_plot = x-x_true;
-        %x_plot = x;
-        x_upper_plot = x_upper-x;
-        x_lower_plot = x_lower-x;
-    else
-        x_plot = x;
-        x_upper_plot = x_upper;
-        x_lower_plot = x_lower;
-    end
-
     % bounds on the state variable estimate
     if shaded
-        patch([t,fliplr(t)],[x_upper_plot,fliplr(x_lower_plot)],...
-            light_color,'edgecolor','none');
+        patch([t,fliplr(t)],[x_upper,fliplr(x_lower)],light_color,...
+            'edgecolor','none');
     else
-        plot(t,x_lower_plot,'k');
-        plot(t,x_upper_plot,'k','handlevisibility','off');
+        plot(t,x_lower,'k');
+        plot(t,x_upper,'k','handlevisibility','off');
     end
 
     % plots state variable estimates
     if dots
-        plot(t,x_plot,'.','markersize',7,'color',color);
+        plot(t,x,'.','markersize',7,'color',color);
     else
-        plot(t,x_plot,'k','linewidth',1.5,'color',color);
+        plot(t,x,'k','linewidth',1.5,'color',color);
     end
 
     % plots true state variable
-    if ~plot_error
-        if dots
-            plot(t,x_true,'.','markersize',7,'color',color);
-        else
-            plot(t,x_true,'k--','linewidth',1.5,'color',color);
-        end
+    if dots
+        plot(t,x_true,'.','markersize',7,'color',color);
+    else
+        plot(t,x_true,'k--','linewidth',1.5,'color',color);
     end
 
     % -------
@@ -243,7 +219,7 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
         % length of time vector
         N = length(t);
     
-        % obtain average Mσ covariance bound (ignore first 10% of data due
+        % obtain avgerage Mσ covariance bound (ignore first 10% of data due
         % to transience)
         avg_bound = mean(x_upper(round(N/10):end)-x(round(N/10):end));
     
@@ -260,31 +236,21 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
         else
             estimate_str = ""+name+" estimate";
         end
-        if plot_error
-            estimate_str = "error in "+estimate_str;
-        end
 
         % string for covariance bounds legend entry
         covariance_str = "$\pm"+avg_bound_str+"\;\mathrm{"+xunits+...
                 "}$ ($\pm"+M+"\sigma$)";
     
         % string for true state legend entry
-        if ~plot_error
-            if name ~= ""
-                true_str = "true "+name;
-            else
-                true_str = "true state";
-            end
+        if name ~= ""
+            true_str = "true "+name;
+        else
+            true_str = "true state";
         end
 
         % legend
-        if plot_error
-            legend(covariance_str,estimate_str,'interpreter','latex',...
-                'fontsize',14,'location','northeast');
-        else
-            legend(covariance_str,estimate_str,true_str,'interpreter',...
-                'latex','fontsize',14,'location','northeast');
-        end
+        legend(covariance_str,estimate_str,true_str,'interpreter',...
+            'latex','fontsize',14,'location','northeast');
 
     end
 

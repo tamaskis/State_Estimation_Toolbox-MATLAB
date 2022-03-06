@@ -45,7 +45,8 @@
 %   z_post  - (p×T double) post-fit measurement residuals
 %
 %==========================================================================
-function [x,P,tsol,rank_Ob,z_pre,z_post] = EKF(f,h,F,H,Q,R,t,u,y,x0,P0,wb)
+function [x,P,tsol,rank_Ob,z_pre,z_post] = EKF_sim_old(f,h,F,H,Q,R,t,u,...
+    y,x0,P0,wb)
     
     % -------------------
     % Setting up waitbar.
@@ -61,6 +62,9 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKF(f,h,F,H,Q,R,t,u,y,x0,P0,wb)
         display_waitbar = false;
     end
 
+    if isempty(u)
+        u = zeros(1,length(t));
+    end
     % -----------------------
     % Extended Kalman filter.
     % -----------------------
@@ -93,10 +97,10 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKF(f,h,F,H,Q,R,t,u,y,x0,P0,wb)
         P_pred = F_prev*P(:,:,k-1)*F_prev'+Q;
         
         % evaluates sensitivity matrix at predicted state
-        Hk = H(x_pred,k);
+        Hk = H(x_pred,k-1);
         
         % pre-fit measurement residual
-        z_pre(:,k) = y(:,k)-h(x_pred,k);
+        z_pre(:,k) = y(:,k)-h(x_pred,k-1);
         
         % Kalman gain
         K = P_pred*Hk'/(Hk*P_pred*Hk'+R);
@@ -106,10 +110,10 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKF(f,h,F,H,Q,R,t,u,y,x0,P0,wb)
         P(:,:,k) = (eye(n)-K*Hk)*P_pred;
         
         % post-fit measurement residual
-        z_post(:,k) = y(:,k)-h(x(:,k),k);
+        z_post(:,k) = y(:,k)-h(x(:,k),k-1);
         
         % rank of the observability matrix
-        rank_Ob(k) = rank(obsv(F(x(:,k),u(:,k),k),H(x(:,k),k)));
+        rank_Ob(k) = rank(obsv(F(x(:,k),u(:,k),k-1),H(x(:,k),k-1)));
 
         % updates waitbar
         if display_waitbar, prop = update_waitbar(k,T,wb,prop); end
