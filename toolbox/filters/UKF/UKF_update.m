@@ -1,11 +1,11 @@
 %==========================================================================
 %
-% EKF_update  EKF update step (measurement update).
+% UKF_update  UKF update step (measurement update).
 %
-%   [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,Rk)
+%   [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-05
+% Last Update: 2022-03-20
 %
 % REFERENCES:
 %   [1] TODO
@@ -21,8 +21,6 @@
 %   k       - (1×1 double) current sample number
 %   hd      - (1×1 function_handle) discrete nonlinear measurement 
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   H       - (1×1 function_handle) Hₖ = H(xₖ,uₖ) --> discrete measurement
-%             Jacobian (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
 %   Rk      - (p×p double) measurement noise covariance at current sample
 %             time
 %
@@ -35,34 +33,48 @@
 %             time
 %   z_pre   - (p×1 double) pre-fit measurement residual
 %   z_post  - (p×1 double) post-fit measurement residual
-%   Hk      - (p×m double) discrete measurement Jacobian at current sample
-%             time
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,Rk)
+function [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk)
     
-    % state dimension
+    % state (n) and measurement (p) dimensions
     n = length(x_pred);
+    p = length(yk);
 
-    % discrete measurement Jacobian at current sample time
-    Hk = H(x_pred,k);
-
+    % sigma points from predicted state estimate statistics
+    [Chi,w] = UT(x_pred,P_pred);
+    
+    % passing sigma points through nonlinear measurement equation
+    Y = zeros(p,2*n+1);
+    y_pred = zeros(p,1);
+    for i = 1:(2*n+1)
+        Y(:,i) = hd(Chi(:,i),k);
+        y_pred = y_pred+w(i)*Y(:,i);
+    end
+    
     % pre-fit measurement residual (innovation)
-    z_pre = yk-hd(x_pred,k);
-
-    % pre-fit measurement residual covariance (innovation covariance)
-    S = Hk*P_pred*Hk.'+Rk;
-
+    z_pre = yk-y_pred;
+    
+    % covariance of predicted measurement and cross covariance between
+    % predicted state and predicted measurement
+    Py = zeros(p,p);
+    Pxy = zeros(n,p);
+    for i = 1:(2*n+1)
+        Py = Py+w(i)*(Y(:,i)-y_pred)*(Y(:,i)-y_pred)';
+        Pxy = Pxy+w(i)*(Chi(:,i)-x_pred)*(Y(:,i)-y_pred)';
+    end
+    Py = Py+Rk;
+    
     % Kalman gain
-    Kk = P_pred*Hk.'/S;
-
+    K = Pxy/Py;
+    
     % a posteriori state estimate at current sample time
-    xk = x_pred+Kk*z_pre;
-
+    xk = x_pred+K*z_pre;
+    
     % a posteriori error covariance at current sample time
-    Pk = (eye(n)-Kk*Hk)*P_pred;
-
+    Pk = P_pred-K*Py*K.';
+    
     % post-fit measurement residual
     z_post = yk-hd(xk,k);
-
+    
 end

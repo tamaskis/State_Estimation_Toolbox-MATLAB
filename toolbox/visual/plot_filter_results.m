@@ -10,7 +10,7 @@
 %   plot_filter_results(__,opts)
 %
 % Author: Tamas Kis
-% Last Update: 2021-12-09
+% Last Update: 2022-03-15
 %
 %--------------------------------------------------------------------------
 %
@@ -37,7 +37,7 @@
 %       • error  - (1×1 logical) true if error in state estimate should be
 %                  plotted, false otherwise (defaults to false)
 %       • figure - (1×1 logical) true if new figure should be created,
-%                   false otherwise
+%                   false otherwise (defaults to true)
 %       • grid   - (1×1 logical) true for grid on, false otherwise
 %                  (defaults to true)
 %       • legend - (1×1 logical) true to include legend, false otherwise
@@ -64,6 +64,8 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
     %TODO: DOTS VS. LINES
     %TODO: Error only
     %TODO: DOTS FOR ERROR ONLY
+    %TODO: orientation of horizontal axis for fliplr for covar bounds
+
     % ----------------------------------------------------
     % Sets unspecified parameters to their default values.
     % ----------------------------------------------------
@@ -165,7 +167,7 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
     if (nargin < 6) || ~isfield(opts,'tunits')
         tunits = "s";
     else
-        tunits = opts.xunits;
+        tunits = opts.tunits;
     end
 
     % turns state variable axis label on/off (defaults to on)
@@ -312,6 +314,11 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
             xlabel_str = name+", "+symbol;
         end
 
+        % adds "error" designation to string
+        if plot_error
+            xlabel_str = xlabel_str+" error";
+        end
+
         % adds units to string
         if exist('xunits','var') && (xunits ~= "")
             xlabel_str = xlabel_str+" $\left[\mathrm{"+xunits+"}\right]$";
@@ -328,6 +335,11 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
 
     % sets time axis limits
     xlim([min(t),max(t)]);
+
+    % sets vertical axis limits
+    if plot_error
+        ylim([-5*avg_bound,5*avg_bound]);
+    end
 
     % displays grid over all other graphics objects
     if grid_on

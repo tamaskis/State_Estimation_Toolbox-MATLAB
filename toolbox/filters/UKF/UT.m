@@ -5,7 +5,10 @@
 %   [Chi,w] = UT(mu,Sigma,lambda)
 %
 % Author: Tamas Kis
-% Last Update: 2021-11-18
+% Last Update: 2022-03-20
+%
+% REFERENCES:
+%   [1] TODO
 %
 %--------------------------------------------------------------------------
 %
@@ -14,7 +17,7 @@
 % ------
 %   mu      - (n×1 double) mean
 %   Sigma   - (n×n double) covariance
-%   lambda  - (OPTIONAL) (1×1 double) scaling parameter (defaults to 2)
+%   lambda  - (1×1 double) (OPTIONAL) scaling parameter (defaults to 2)
 %
 % -------
 % OUTPUT:
