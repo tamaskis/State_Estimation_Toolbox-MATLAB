@@ -39,30 +39,30 @@
 %             time
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,Rk)
+function [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R)
     
     % state dimension
     n = length(x_pred);
-
+    
     % discrete measurement Jacobian at current sample time
     Hk = H(x_pred,k);
-
+    
     % pre-fit measurement residual (innovation)
     z_pre = yk-hd(x_pred,k);
-
+    
     % pre-fit measurement residual covariance (innovation covariance)
-    S = Hk*P_pred*Hk.'+Rk;
-
+    S = Hk*P_pred*Hk.'+R(x_pred,k);
+    
     % Kalman gain
     Kk = P_pred*Hk.'/S;
 
     % a posteriori state estimate at current sample time
     xk = x_pred+Kk*z_pre;
-
+    
     % a posteriori error covariance at current sample time
     Pk = (eye(n)-Kk*Hk)*P_pred;
-
+    
     % post-fit measurement residual
     z_post = yk-hd(xk,k);
-
+    
 end

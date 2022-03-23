@@ -47,13 +47,12 @@
 %
 %==========================================================================
 function [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,k,...
-    fd,hd,F,H,Q_prev,Rk)
+    fd,hd,F,H,Q,R)
     
     % predict step (time update)
-    [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,...
-        Q_prev);
+    [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,Q);
 
     % update step (measurement update)
-    [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,Rk);
+    [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R);
     
 end

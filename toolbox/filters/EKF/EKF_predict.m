@@ -36,7 +36,7 @@
 %
 %==========================================================================
 function [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,...
-    F,Q_prev)
+    F,Q)
     
     % discrete dynamics Jacobian at previous sample time
     F_prev = F(x_prev,u_prev,k-1);
@@ -45,6 +45,6 @@ function [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,...
     x_pred = fd(x_prev,u_prev,k-1);
 
     % a priori error covariance at current sample time
-    P_pred = F_prev*P_prev*F_prev'+Q_prev;
+    P_pred = F_prev*P_prev*F_prev'+Q(x_prev,k-1);
     
 end
