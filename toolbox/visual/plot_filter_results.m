@@ -10,7 +10,7 @@
 %   plot_filter_results(__,opts)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-15
+% Last Update: 2022-03-30
 %
 %--------------------------------------------------------------------------
 %
@@ -19,12 +19,12 @@
 % ------
 %   t           - (1×N double) time vector
 %   x           - (1×N double) a posteriori state variable estimates
-%   x_lower     - (OPTIONAL) (1×N double) lower covariance bound on state 
+%   x_lower     - (1×N double) (OPTIONAL) lower covariance bound on state 
 %                 variable estimates
-%   x_upper     - (OPTIONAL) (1×N double) upper covariance bound on state 
+%   x_upper     - (1×N double) (OPTIONAL) upper covariance bound on state 
 %                 variable estimates
-%   x_true      - (OPTIONAL) (1×N double) true state variable time history
-%   opts        - (OPTIONAL) (struct) plot options
+%   x_true      - (1×N double) (OPTIONAL) true state variable time history
+%   opts        - (1×1 struct) (OPTIONAL) plot options
 %       • color  - (char or 1×3 double) color scheme (defaults to 
 %                  [0,0.4470,0.7410]) [rgb]
 %                       --> can be specified as a name, short name, or
@@ -201,7 +201,6 @@ function plot_filter_results(t,x,x_lower,x_upper,x_true,opts)
 
     if plot_error
         x_plot = x-x_true;
-        %x_plot = x;
         x_upper_plot = x_upper-x;
         x_lower_plot = x_lower-x;
     else

@@ -6,7 +6,7 @@
 %   [mu_lower,mu_upper] = covariance_bounds(mu,Sigma,M)
 %
 % Author: Tamas Kis
-% Last Update: 2021-12-09
+% Last Update: 2022-03-30
 %
 %--------------------------------------------------------------------------
 %
@@ -15,7 +15,7 @@
 % ------
 %   mu          - (n×N double) time history of mean (μ)
 %   Sigma       - (n×n×N double) time history of covariance (Σ)
-%   M           - (OPTIONAL) (1×1 double) number of standard deviations for
+%   M           - (1×1 double) (OPTIONAL) number of standard deviations for
 %                 bounds (defaults to 1)
 %                   --> for example, M = 2 returns ±2σ
 %
