@@ -54,20 +54,20 @@ function [x,y] = simulate_linear(F,G,H,Q,R,u,IC,seed)
         x0_true = mvnrnd(IC.x0,IC.P0);
     end
     
-    % length of time vector, state dimension, and measurement dimension
-    T = length(u);
+    % number of samples, state dimension, and measurement dimension
+    N = length(u);
     n = length(x0_true);
-    p = size(R,1);
+    p = size(R(x0_true,1),1);
     
     % preallocates arrays
-    x = zeros(n,T);
-    y = zeros(p,T);
+    x = zeros(n,N);
+    y = zeros(p,N);
     
     % assigns initial condition
     x(:,1) = x0_true;
     
     % simulation of ground truth
-    for k = 2:T
+    for k = 2:N
         
         % state transition, input, and sensitivity matrices
         Phi_prev = F(x(:,k-1),u(:,k-1),k-1);

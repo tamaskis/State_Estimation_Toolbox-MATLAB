@@ -2,40 +2,41 @@
 %
 % simulate_nonlinear  Simulation of a nonlinear system.
 %
-%   [x,y] = simulate_nonlinear(f,h,Q,R,t,u,IC)
-%   [x,y] = simulate_nonlinear(f,h,Q,R,t,u,IC,seed)
+%   [x,y] = simulate_nonlinear(fd,hd,Q,R,u,IC)
+%   [x,y] = simulate_nonlinear(fd,hd,Q,R,u,IC,seed)
 %
 % Author: Tamas Kis
-% Last Update: 2021-11-14
+% Last Update: 2022-03-30
 %
 %--------------------------------------------------------------------------
 %
 % ------
 % INPUT:
 % ------
-%   f       - (function_handle) f(x,u,k) --> (f:Rn×Rm×R->Rn) discrete-time 
-%                                            nonlinear dynamics equation
-%   h       - (function_handle) h(x,k)   --> (h:Rn×R->Rp) discrete-time 
-%                                            nonlinear measurement equation
-%   Q       - (n×n double) process noise covariance (assumed constant)
-%   R       - (p×p double) measurement noise covariance (assumed constant)
-%   t       - (T×1 double) time vector
-%   u       - (m×T double) control input time history
-%   IC      - (struct) structure storing initial conditions
+%   fd      - (1×1 function_handle) discrete dynamics equation,
+%             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
+%   hd      - (1×1 function_handle) discrete measurement equation,
+%             yₖ = hd(xₖ,k) (hd : ℝⁿ×ℤ → ℝᵖ)
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   u       - (m×(N-1) double) (OPTIONAL) control input history
+%   IC      - (1×1 struct) structure storing initial conditions
 %       • x0        - (n×1 double) initial state estimate
 %       • P0        - (n×n double) initial error covariance
 %                           OR
 %       • x0_true   - (n×1 double) ground truth initial state
-%   seed    - (OPTIONAL) (1×1 double) seed for random number generator
+%   seed    - (1×1 double) (OPTIONAL) seed for random number generator
 %
 % -------
 % OUTPUT:
 % -------
-%   x       - (n×T double) ground truth dynamics simulation
-%   y       - (p×T double) ground truth measurement simulation
+%   x       - (n×N double) ground truth state trajectory
+%   y       - (p×N double) ground truth measurement history
 %
 %==========================================================================
-function [x,y] = simulate_nonlinear(f,h,Q,R,t,u,IC,seed)
+function [x,y] = simulate_nonlinear(fd,hd,Q,R,u,IC,seed)
     
     % sets random seed if specified
     if nargin == 8
@@ -51,26 +52,26 @@ function [x,y] = simulate_nonlinear(f,h,Q,R,t,u,IC,seed)
         x0_true = mvnrnd(IC.x0,IC.P0);
     end
     
-    % length of time vector, state dimension, and measurement dimension
-    T = length(t);
+    % number of samples, state dimension, and measurement dimension
+    N = length(u);
     n = length(x0_true);
-    p = size(R,1);
+    p = size(R(x0_true,1),1);
     
     % preallocates arrays
-    x = zeros(n,T);
-    y = zeros(p,T);
+    x = zeros(n,N);
+    y = zeros(p,N);
     
     % assigns initial condition
     x(:,1) = x0_true;
     
     % simulation of ground truth
-    for k = 2:T
+    for k = 2:N
         
         % state propagation with process noise
-        x(:,k) = f(x(:,k-1),u(:,k-1),k-1)+mvnrnd(zeros(n,1),Q)';
+        x(:,k) = fd(x(:,k-1),u(:,k-1),k-1)+mvnrnd(zeros(n,1),Q)';
         
         % measurement simulation with measurement noise
-        y(:,k) = h(x(:,k),k)+mvnrnd(zeros(p,1),R)';
+        y(:,k) = hd(x(:,k),k)+mvnrnd(zeros(p,1),R)';
         
     end
     
