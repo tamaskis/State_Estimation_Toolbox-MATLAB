@@ -8,10 +8,7 @@
 %   [__] = EUKF_sim(__,wb)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -24,9 +21,11 @@
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
 %   F       - (1×1 function_handle) Fₖ = F(xₖ,uₖ,k) --> discrete dynamics
 %             Jacobian (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   Q       - (n×n double) process noise covariance (assumed constant)
-%   R       - (p×p double) measurement noise covariance (assumed constant)
-%   u       - (m×(N-1) double) (OPTIONAL) control input time history
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   u       - (m×(N-1) double) (OPTIONAL) control input history
 %   y       - (p×N double) measurement time history
 %   x0      - (n×1 double) initial state estimate
 %   P0      - (n×n double) initial error covariance
@@ -96,7 +95,6 @@ function [x,P,tsol,z_pre,z_post] = EUKF_sim(fd,hd,F,Q,R,u,y,x0,P0,wb)
     P = zeros(n,n,N);
     z_pre = zeros(p,N);
     z_post = zeros(p,N);
-    Fk = zeros(n,n,N);
     
     % assigns initial conditions
     x(:,1) = x0;

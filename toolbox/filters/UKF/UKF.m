@@ -2,13 +2,10 @@
 %
 % UKF  Unscented Kalman filter.
 %
-%   [xk,Pk,z_pre,z_post] = UKF(x_prev,P_prev,u_prev,yk,k,fd,hd,Q_prev,Rk)
+%   [xk,Pk,z_pre,z_post] = UKF(x_prev,P_prev,u_prev,yk,k,fd,hd,Q,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -24,9 +21,10 @@
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
 %   hd      - (1×1 function_handle) discrete nonlinear measurement 
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   Q_prev  - (n×n double) process noise covariance at previous sample time
-%   Rk      - (p×p double) measurement noise covariance at current sample
-%             time
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:
@@ -37,13 +35,12 @@
 %   z_post  - (p×1 double) post-fit measurement residual
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post] = UKF(x_prev,P_prev,u_prev,yk,k,fd,hd,...
-    Q_prev,Rk)
+function [xk,Pk,z_pre,z_post] = UKF(x_prev,P_prev,u_prev,yk,k,fd,hd,Q,R)
     
     % predict step (time update)
-    [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q_prev);
+    [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q);
 
     % update step (measurement update)
-    [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk);
+    [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,R);
     
 end

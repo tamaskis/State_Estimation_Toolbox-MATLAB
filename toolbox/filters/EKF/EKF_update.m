@@ -2,7 +2,7 @@
 %
 % EKF_update  EKF update step (measurement update).
 %
-%   [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,Rk)
+%   [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R)
 %
 % Author: Tamas Kis
 % Last Update: 2022-03-05
@@ -23,8 +23,8 @@
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
 %   H       - (1×1 function_handle) Hₖ = H(xₖ,uₖ) --> discrete measurement
 %             Jacobian (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
-%   Rk      - (p×p double) measurement noise covariance at current sample
-%             time
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:

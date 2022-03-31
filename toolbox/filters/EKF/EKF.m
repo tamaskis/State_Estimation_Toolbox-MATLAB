@@ -3,13 +3,10 @@
 % EKF  Extended Kalman filter.
 %
 %   [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,k,fd,...
-%       hd,F,H,Q_prev,Rk)
+%       hd,F,H,Q,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-05
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -29,9 +26,10 @@
 %             Jacobian (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
 %   H       - (1×1 function_handle) Hₖ = H(xₖ,uₖ) --> discrete measurement
 %             Jacobian (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
-%   Q_prev  - (n×n double) process noise covariance at previous sample time
-%   Rk      - (p×p double) measurement noise covariance at current sample
-%             time
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:

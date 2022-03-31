@@ -2,41 +2,43 @@
 %
 % simulate_linear  Simulation of a linear system.
 %
-%   [x,y] = simulate_linear(Phi,Gamma,H,Q,R,u,IC)
-%   [x,y] = simulate_linear(Phi,Gamma,H,Q,R,u,IC,seed)
+%   [x,y] = simulate_linear(F,G,H,Q,R,u,IC)
+%   [x,y] = simulate_linear(F,G,H,Q,R,u,IC,seed)
 %
 % Author: Tamas Kis
-% Last Update: 2021-11-14
+% Last Update: 2022-03-30
 %
 %--------------------------------------------------------------------------
 %
 % ------
 % INPUT:
 % ------
-%   Phi  	- (function_handle) Φ(x,u,k) --> (Φ:Rn×Rm×R->Rn×Rn) state 
-%                                            transition matrix
-%   Gamma   - (function_handle) Γ(x,u,k) --> (Γ:Rn×Rm×R->Rn×Rm) input
-%                                            matrix
-%   C       - (function_handle) C(x,k)   --> (C:Rn×R->Rp×Rn) measurement 
-%                                            matrix
-%   Q       - (n×n double) process noise covariance (assumed constant)
-%   R       - (p×p double) measurement noise covariance (assumed constant)
-%   u       - (m×T double) control input time history
-%   IC      - (struct) structure storing initial conditions
-%       • x0        - (n×1 double) initial state estimate
-%       • P0        - (n×n double) initial error covariance
+%   F       - (1×1 function_handle) Fₖ = F(xₖ,uₖ,k) --> discrete dynamics
+%             matrix (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   G       - (1×1 function_handle) Gₖ = G(xₖ,uₖ,k) --> discrete input
+%             matrix (G : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣᵐ)
+%   H       - (1×1 function_handle) Hₖ = H(xₖ,uₖ) --> discrete measurement
+%             matrix (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   u       - (m×(N-1) double) (OPTIONAL) control input history
+%   IC      - (1×1 struct) structure storing initial conditions
+%       • x0      - (n×1 double) initial state estimate
+%       • P0      - (n×n double) initial error covariance
 %                           OR
-%       • x0_true   - (n×1 double) ground truth initial state
-%   seed    - (OPTIONAL) (1×1 double) seed for random number generator
+%       • x0_true - (n×1 double) ground truth initial state
+%   seed    - (1×1 double) (OPTIONAL) seed for random number generator
 %
 % -------
 % OUTPUT:
 % -------
-%   x       - (n×T double) ground truth dynamics simulation
-%   y       - (p×T double) ground truth measurement simulation
+%   x       - (n×N double) ground truth state trajectory
+%   y       - (p×N double) ground truth measurement history
 %
 %==========================================================================
-function [x,y] = simulate_linear(Phi,Gamma,C,Q,R,u,IC,seed)
+function [x,y] = simulate_linear(F,G,H,Q,R,u,IC,seed)
     
     % seeds random number generator
     if nargin == 8
@@ -68,9 +70,9 @@ function [x,y] = simulate_linear(Phi,Gamma,C,Q,R,u,IC,seed)
     for k = 2:T
         
         % state transition, input, and sensitivity matrices
-        Phi_prev = Phi(x(:,k-1),u(:,k-1),k-1);
-        Gamma_prev = Gamma(x(:,k-1),u(:,k-1),k-1);
-        Ck = C(x(:,k),k);
+        Phi_prev = F(x(:,k-1),u(:,k-1),k-1);
+        Gamma_prev = G(x(:,k-1),u(:,k-1),k-1);
+        Ck = H(x(:,k),k);
         
         % state propagation with process noise
         x(:,k) = Phi_prev*x(:,k-1)+Gamma_prev*u(:,k-1)+...

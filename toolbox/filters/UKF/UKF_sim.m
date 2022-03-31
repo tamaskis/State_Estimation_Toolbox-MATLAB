@@ -8,10 +8,7 @@
 %   [__] = UKF_sim(__,wb)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -22,9 +19,11 @@
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
 %   hd      - (1×1 function_handle) discrete nonlinear measurement 
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   Q       - (n×n double) process noise covariance (assumed constant)
-%   R       - (p×p double) measurement noise covariance (assumed constant)
-%   u       - (m×(N-1) double) (OPTIONAL) control input time history
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   u       - (m×(N-1) double) (OPTIONAL) control input history
 %   y       - (p×N double) measurement time history
 %   x0      - (n×1 double) initial state estimate
 %   P0      - (n×n double) initial error covariance

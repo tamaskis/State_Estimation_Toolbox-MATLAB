@@ -2,13 +2,10 @@
 %
 % UKF_predict  UKF predict step (time update).
 %
-%   [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q_prev)
+%   [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -21,7 +18,8 @@
 %   k       - (1×1 double) current sample number
 %   fd      - (1×1 function_handle) discrete nonlinear dynamics equation,
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
-%   Q_prev  - (n×n double) process noise covariance at previous sample time
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
 %
 % -------
 % OUTPUT:
@@ -30,7 +28,7 @@
 %   P_pred  - (n×n double) a priori error covariance at current sample time
 %
 %==========================================================================
-function [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q_prev)
+function [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q)
     
     % state dimension
     n = length(x_prev);
@@ -47,6 +45,6 @@ function [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,k,fd,Q_prev)
     [x_pred,P_tilde] = iUT(Chi,w);
     
     % a priori error covariance at current sample time
-    P_pred = P_tilde+Q_prev;
+    P_pred = P_tilde+Q(x_prev,u_prev,k-1);
     
 end

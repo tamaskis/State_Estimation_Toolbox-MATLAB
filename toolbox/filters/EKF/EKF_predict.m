@@ -2,14 +2,10 @@
 %
 % EKF_predict  EKF predict step (time update).
 %
-%   [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,...
-%       Q_prev)
+%   [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,Q)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-05
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -24,7 +20,8 @@
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
 %   F       - (1×1 function_handle) Fₖ = F(xₖ,uₖ,k) --> discrete dynamics
 %             Jacobian (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   Q_prev  - (n×n double) process noise covariance at previous sample time
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
 %
 % -------
 % OUTPUT:
@@ -43,8 +40,8 @@ function [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,...
     
     % a priori state estimate at current sample time
     x_pred = fd(x_prev,u_prev,k-1);
-
+    
     % a priori error covariance at current sample time
-    P_pred = F_prev*P_prev*F_prev'+Q(x_prev,k-1);
+    P_pred = F_prev*P_prev*F_prev.'+Q(x_prev,u_prev,k-1);
     
 end

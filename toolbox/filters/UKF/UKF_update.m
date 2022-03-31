@@ -2,13 +2,10 @@
 %
 % UKF_update  UKF update step (measurement update).
 %
-%   [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk)
+%   [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -21,8 +18,8 @@
 %   k       - (1×1 double) current sample number
 %   hd      - (1×1 function_handle) discrete nonlinear measurement 
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   Rk      - (p×p double) measurement noise covariance at current sample
-%             time
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:
@@ -35,7 +32,7 @@
 %   z_post  - (p×1 double) post-fit measurement residual
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk)
+function [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,R)
     
     % state (n) and measurement (p) dimensions
     n = length(x_pred);
@@ -63,7 +60,7 @@ function [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk)
         Py = Py+w(i)*(Y(:,i)-y_pred)*(Y(:,i)-y_pred)';
         Pxy = Pxy+w(i)*(Chi(:,i)-x_pred)*(Y(:,i)-y_pred)';
     end
-    Py = Py+Rk;
+    Py = Py+R(x_pred,k);
     
     % Kalman gain
     K = Pxy/Py;

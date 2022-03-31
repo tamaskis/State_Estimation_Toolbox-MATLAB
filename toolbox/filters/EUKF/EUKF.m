@@ -2,14 +2,10 @@
 %
 % EUKF  Extended/Unscented Kalman filter.
 %
-%   [xk,Pk,z_pre,z_post] = EUKF(x_prev,P_prev,u_prev,yk,k,fd,hd,F,...
-%       Q_prev,Rk)
+%   [xk,Pk,z_pre,z_post] = EUKF(x_prev,P_prev,u_prev,yk,k,fd,hd,F,Q,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-28
 %
 %--------------------------------------------------------------------------
 %
@@ -27,9 +23,10 @@
 %             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
 %   F       - (1×1 function_handle) Fₖ = F(xₖ,uₖ,k) --> discrete dynamics
 %             Jacobian (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   Q_prev  - (n×n double) process noise covariance at previous sample time
-%   Rk      - (p×p double) measurement noise covariance at current sample
-%             time
+%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
+%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
+%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:
@@ -40,13 +37,12 @@
 %   z_post  - (p×1 double) post-fit measurement residual
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post] = EUKF(x_prev,P_prev,u_prev,yk,k,fd,hd,F,...
-    Q_prev,Rk)
+function [xk,Pk,z_pre,z_post] = EUKF(x_prev,P_prev,u_prev,yk,k,fd,hd,F,Q,R)
     
     % predict step (time update)
-    [x_pred,P_pred] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,Q_prev);
+    [x_pred,P_pred] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,Q);
     
     % update step (measurement update)
-    [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,Rk);
+    [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,R);
     
 end
