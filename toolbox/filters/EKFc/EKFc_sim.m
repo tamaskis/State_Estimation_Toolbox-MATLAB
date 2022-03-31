@@ -75,28 +75,14 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
     % Setting up waitbar.
     % -------------------
     
-    % determines if waitbar is on or off
-    if (nargin < 14) || (islogical(wb) && ~wb)
-        display_waitbar = false;
+    % initializes the waitbar --> TODO: rewrite as script so all functions
+    % within scope
+    if (nargin == 14)
+        [wb,prop,display_waitbar] = initialize_waitbar(wb,...
+            'Running extended Kalman filter...');
     else
-        display_waitbar = true;
+        display_waitbar = false;
     end
-
-    % sets the waitbar message (defaults to 'Running extended Kalman 
-    % filter...')
-    if display_waitbar
-        if ischar(wb)
-            msg = wb;
-        else
-            msg = 'Running extended Kalman filter...';
-        end
-    end
-
-    % initialize cutoff proportion needed to trigger waitbar update to 0.1
-    if display_waitbar, prop = 0.1; end
-
-    % initializes the waitbar
-    if display_waitbar, wb = waitbar(0,msg); end
 
     % -----------------------
     % Extended Kalman filter.
@@ -170,42 +156,5 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
 
     % closes waitbar
     if display_waitbar, close(wb); end
-
-    % -------------
-    % Subfunctions.
-    % -------------
-
-    %----------------------------------------------------------------------
-    % update_waitbar  Updates the waitbar.
-    %----------------------------------------------------------------------
-    %
-    % INPUT:
-    %   wb      - (1×1 Figure) waitbar
-    %   n       - (1×1 double) current sample number (i.e. iteration)
-    %  	N       - (1×1 double) total number of samples (i.e. iterations)
-    %   prop    - (1×1 double) cutoff proportion to trigger waitbar update
-    %
-    % OUTPUT:
-    %   prop    - (1×1 double) cutoff proportion to trigger waitbar update
-    %
-    % NOTE:
-    %   --> "prop" is an integer multiple of 0.1 so that the waitbar is
-    %       only updated after every additional 10% of progress.
-    %
-    %----------------------------------------------------------------------
-    function prop = update_waitbar(i,N,wb,prop)
-        
-        % only updates waitbar if current proportion exceeds cutoff prop.
-        if i/N > prop
-            
-            % updates waitbar
-            waitbar(i/N,wb);
-            
-            % updates cutoff proportion needed to trigger waitbar update
-            prop = prop+0.1;
-            
-        end
-        
-    end
     
 end
