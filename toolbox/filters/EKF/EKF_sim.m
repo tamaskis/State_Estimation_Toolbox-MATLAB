@@ -8,27 +8,27 @@
 %   [__] = EKF_sim(__,wb)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-28
+% Last Update: 2022-03-31
 %
 %--------------------------------------------------------------------------
 %
 % ------
 % INPUT:
 % ------
-%   fd      - (1×1 function_handle) discrete nonlinear dynamics equation,
+%   fd      - (1×1 function_handle) discrete dynamics equation,
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
-%   hd      - (1×1 function_handle) discrete nonlinear measurement 
-%             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   F       - (1×1 function_handle) Fₖ = F(xₖ,uₖ,k) --> discrete dynamics
-%             Jacobian (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   H       - (1×1 function_handle) Hₖ = H(xₖ,uₖ) --> discrete measurement
-%             Jacobian (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
-%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
-%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
-%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   hd      - (1×1 function_handle) discrete measurement equation,
+%             yₖ = hd(xₖ,k) (hd : ℝⁿ×ℤ → ℝᵖ)
+%   F       - (1×1 function_handle) discrete dynamics Jacobian, 
+%             Fₖ = F(xₖ,uₖ,k) (F : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   H       - (1×1 function_handle) discrete measurement Jacobian,
+%             Hₖ = H(xₖ,k) (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
+%   Q       - (1×1 function_handle) process noise covariance, 
+%             Qₖ = Q(xₖ,uₖ,k) (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) measurement noise covariance, 
+%             Rₖ = R(xₖ,k) (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %   u       - (m×(N-1) double) (OPTIONAL) control input history
-%   y       - (p×N double) measurement time history
+%   y       - (p×N double) measurement history
 %   x0      - (n×1 double) initial state estimate
 %   P0      - (n×n double) initial error covariance
 %   wb      - (char or 1×1 logical) (OPTIONAL) waitbar parameters

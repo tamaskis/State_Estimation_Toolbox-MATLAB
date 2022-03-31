@@ -1,11 +1,11 @@
 %==========================================================================
 %
-% UKF  Unscented Kalman filter.
+% UKF  Unscented Kalman filter (single iteration).
 %
 %   [xk,Pk,z_pre,z_post] = UKF(x_prev,P_prev,u_prev,yk,k,fd,hd,Q,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-28
+% Last Update: 2022-03-31
 %
 %--------------------------------------------------------------------------
 %
@@ -17,14 +17,14 @@
 %   u_prev  - (m×1 double) control input at previous sample time
 %   yk      - (p×1 double) measurement at current sample time
 %   k       - (1×1 double) current sample number
-%   fd      - (1×1 function_handle) discrete nonlinear dynamics equation,
+%   fd      - (1×1 function_handle) discrete dynamics equation,
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
-%   hd      - (1×1 function_handle) discrete nonlinear measurement 
-%             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   Q       - (1×1 function_handle) Qₖ = Q(xₖ,uₖ,k) --> process noise 
-%             covariance (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
-%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
-%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   hd      - (1×1 function_handle) discrete measurement equation,
+%             yₖ = hd(xₖ,k) (hd : ℝⁿ×ℤ → ℝᵖ)
+%   Q       - (1×1 function_handle) process noise covariance, 
+%             Qₖ = Q(xₖ,uₖ,k) (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
+%   R       - (1×1 function_handle) measurement noise covariance, 
+%             Rₖ = R(xₖ,k) (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:

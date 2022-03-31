@@ -5,7 +5,7 @@
 %   [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,k,hd,R)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-28
+% Last Update: 2022-03-31
 %
 %--------------------------------------------------------------------------
 %
@@ -16,10 +16,10 @@
 %   P_pred  - (n×n double) a priori error covariance at current sample
 %   yk      - (p×1 double) measurement at current sample time
 %   k       - (1×1 double) current sample number
-%   hd      - (1×1 function_handle) discrete nonlinear measurement 
-%             equation, yₖ = hd(xₖ,k) (fd : ℝⁿ×ℤ → ℝᵖ)
-%   R       - (1×1 function_handle) Rₖ = R(xₖ,k) --> measurement noise 
-%             covariance (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   hd      - (1×1 function_handle) discrete measurement equation,
+%             yₖ = hd(xₖ,k) (hd : ℝⁿ×ℤ → ℝᵖ)
+%   R       - (1×1 function_handle) measurement noise covariance, 
+%             Rₖ = R(xₖ,k) (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
 %
 % -------
 % OUTPUT:

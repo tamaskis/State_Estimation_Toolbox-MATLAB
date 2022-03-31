@@ -1,8 +1,9 @@
 %==========================================================================
 %
-% EKF_update  EKF update step (measurement update).
+% EKFc_update  EKF update step (measurement update) for continuous-time
+% systems.
 %
-%   [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R)
+%   [xk,Pk,z_pre,z_post,Hk] = EKFc_update(x_pred,P_pred,yk,h,C,R,k,dt,t0)
 %
 % Author: Tamas Kis
 % Last Update: 2022-03-31
@@ -15,13 +16,15 @@
 %   x_pred  - (n×1 double) a priori state estimate at current sample time
 %   P_pred  - (n×n double) a priori error covariance at current sample
 %   yk      - (p×1 double) measurement at current sample time
-%   k       - (1×1 double) current sample number
-%   hd      - (1×1 function_handle) discrete measurement equation,
-%             yₖ = hd(xₖ,k) (hd : ℝⁿ×ℤ → ℝᵖ)
-%   H       - (1×1 function_handle) discrete measurement Jacobian,
-%             Hₖ = H(xₖ,k) (H : ℝⁿ×ℤ → ℝᵖˣⁿ)
+%   h       - (1×1 function_handle) continuous measurement equation,
+%             y = h(x,t) (h : ℝⁿ×ℝ → ℝᵖ)
+%   C       - (1×1 function_handle) continuous measurement Jacobian,
+%             C(t) = C(x,t) (C : ℝⁿ×ℝ → ℝᵖˣⁿ)
 %   R       - (1×1 function_handle) measurement noise covariance, 
 %             Rₖ = R(xₖ,k) (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   k       - (1×1 double) current sample number
+%   dt      - (1×1 double) time step, Δt
+%   t0      - (1×1 double) initial time, t₀
 %
 % -------
 % OUTPUT:
@@ -36,30 +39,37 @@
 %             time
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R)
+function [xk,Pk,z_pre,z_post,Hk] = EKFc_update(x_pred,P_pred,yk,h,C,R,k,...
+    dt,t0)
     
+    % current time
+    t = k2t_num(k,dt,t0);
+
     % state dimension
     n = length(x_pred);
     
-    % discrete measurement Jacobian at current sample time
-    Hk = H(x_pred,k);
+    % continuous measurement Jacobian at current sample time
+    Ct = C(x_pred,t);
     
     % pre-fit measurement residual (innovation)
-    z_pre = yk-hd(x_pred,k);
+    z_pre = yk-h(x_pred,t);
     
     % pre-fit measurement residual covariance (innovation covariance)
-    S = Hk*P_pred*Hk.'+R(x_pred,k);
+    S = Ct*P_pred*Ct.'+R(x_pred,k);
     
     % Kalman gain
-    Kk = P_pred*Hk.'/S;
-
+    Kk = P_pred*Ct.'/S;
+    
     % a posteriori state estimate at current sample time
     xk = x_pred+Kk*z_pre;
     
     % a posteriori error covariance at current sample time
-    Pk = (eye(n)-Kk*Hk)*P_pred;
+    Pk = (eye(n)-Kk*Ct)*P_pred;
     
     % post-fit measurement residual
-    z_post = yk-hd(xk,k);
+    z_post = yk-h(xk,t);
+
+    % discrete measurement Jacobian at current sample time
+    Hk = Ct;
     
 end
