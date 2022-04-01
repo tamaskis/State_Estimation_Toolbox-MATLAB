@@ -2,8 +2,8 @@
 %
 % EKF  Extended Kalman filter (single iteration).
 %
-%   [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,k,fd,...
-%       hd,F,H,Q,R)
+%   [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,fd,hd,...
+%       F,H,Q,R,k)
 %
 % Author: Tamas Kis
 % Last Update: 2022-03-31
@@ -17,7 +17,6 @@
 %   P_prev  - (n×n double) error covariance at previous sample time
 %   u_prev  - (m×1 double) control input at previous sample time
 %   yk      - (p×1 double) measurement at current sample time
-%   k       - (1×1 double) current sample number
 %   fd      - (1×1 function_handle) discrete dynamics equation,
 %             xₖ₊₁ = fd(xₖ,uₖ,k) (fd : ℝⁿ×ℝᵐ×ℤ → ℝⁿ)
 %   hd      - (1×1 function_handle) discrete measurement equation,
@@ -30,6 +29,7 @@
 %             Qₖ = Q(xₖ,uₖ,k) (Q : ℝⁿ×ℝᵐ×ℤ → ℝⁿˣⁿ)
 %   R       - (1×1 function_handle) measurement noise covariance, 
 %             Rₖ = R(xₖ,k) (R : ℝⁿ×ℤ → ℝᵖˣᵖ)
+%   k       - (1×1 double) current sample number
 %
 % -------
 % OUTPUT:
@@ -44,13 +44,13 @@
 %             time
 %
 %==========================================================================
-function [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,k,...
-    fd,hd,F,H,Q,R)
+function [xk,Pk,z_pre,z_post,F_prev,Hk] = EKF(x_prev,P_prev,u_prev,yk,...
+    fd,hd,F,H,Q,R,k)
     
     % predict step (time update)
-    [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,k,fd,F,Q);
+    [x_pred,P_pred,F_prev] = EKF_predict(x_prev,P_prev,u_prev,fd,F,Q,k);
 
     % update step (measurement update)
-    [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,k,hd,H,R);
+    [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,hd,H,R,k);
     
 end

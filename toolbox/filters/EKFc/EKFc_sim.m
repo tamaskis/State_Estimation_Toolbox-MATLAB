@@ -3,8 +3,8 @@
 % EKFc_sim  Simulation of an extended Kalman filter with pre-computed
 % measurements and control inputs for continuous-time systems.
 %
-%   [x,P,tsol,z_pre,z_post] = EKFc_sim(fd,hd,F,H,Q,R,[],y,x0,P0,dt)
-%   [x,P,tsol,z_pre,z_post] = EKFc_sim(fd,hd,F,H,Q,R,u,y,x0,P0,dt)
+%   [x,P,tsol,z_pre,z_post,Fk,Hk] = EKFc_sim(fd,hd,F,H,Q,R,[],y,x0,P0,dt)
+%   [x,P,tsol,z_pre,z_post,Fk,Hk] = EKFc_sim(fd,hd,F,H,Q,R,u,y,x0,P0,dt)
 %   [__] = EKFc_sim(__,t0,method,wb)
 %
 % Author: Tamas Kis
@@ -64,10 +64,6 @@
 function [x,P,tsol,z_pre,z_post,Fk,Hk] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
     P0,dt,t0,method,wb)
     
-    % -------------------------------
-    % Defaulting optional parameters.
-    % -------------------------------
-
     % defaults initial time to empty vector if not input
     if (nargin < 12)
         t0 = [];
@@ -78,22 +74,13 @@ function [x,P,tsol,z_pre,z_post,Fk,Hk] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
         method = [];
     end
     
-    % -------------------
-    % Setting up waitbar.
-    % -------------------
-    
-    % initializes the waitbar --> TODO: rewrite as script so all functions
-    % within scope
+    % initializes the waitbar
     if (nargin == 14)
         [wb,prop,display_waitbar] = initialize_waitbar(wb,...
             'Running extended Kalman filter...');
     else
         display_waitbar = false;
     end
-
-    % -----------------------
-    % Extended Kalman filter.
-    % -----------------------
     
     % number of sample times (including initial time)
     N = size(y,2);

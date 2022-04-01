@@ -2,13 +2,11 @@
 %
 % UT  Unscented transform.
 %
+%   [Chi,w] = UT(mu,Sigma)
 %   [Chi,w] = UT(mu,Sigma,lambda)
 %
 % Author: Tamas Kis
-% Last Update: 2022-03-20
-%
-% REFERENCES:
-%   [1] TODO
+% Last Update: 2022-03-31
 %
 %--------------------------------------------------------------------------
 %
