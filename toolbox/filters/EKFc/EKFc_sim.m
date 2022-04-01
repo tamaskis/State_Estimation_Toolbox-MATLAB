@@ -1,11 +1,11 @@
 %==========================================================================
 %
-% EKF_sim  Simulation of an extended Kalman filter with pre-computed
-% measurements and control inputs.
+% EKFc_sim  Simulation of an extended Kalman filter with pre-computed
+% measurements and control inputs for continuous-time systems.
 %
-%   [x,P,tsol,rank_Ob,z_pre,z_post] = EKF_sim(fd,hd,F,H,Q,R,[],y,x0,P0,dt)
-%   [x,P,tsol,rank_Ob,z_pre,z_post] = EKF_sim(fd,hd,F,H,Q,R,u,y,x0,P0,dt)
-%   [__] = EKF_sim(__,t0,method,wb)
+%   [x,P,tsol,z_pre,z_post] = EKFc_sim(fd,hd,F,H,Q,R,[],y,x0,P0,dt)
+%   [x,P,tsol,z_pre,z_post] = EKFc_sim(fd,hd,F,H,Q,R,u,y,x0,P0,dt)
+%   [__] = EKFc_sim(__,t0,method,wb)
 %
 % Author: Tamas Kis
 % Last Update: 2022-03-31
@@ -49,12 +49,19 @@
 %   x       - (n×N double) a posteriori state estimates
 %   P       - (n×n×N double) a posteriori error covariances
 %   tsol    - (1×1 double) average time for one filter iteration
-%   rank_Ob - (N×1 double) rank of the observability matrix
 %   z_pre   - (p×N double) pre-fit measurement residuals
 %   z_post  - (p×N double) post-fit measurement residuals
+%   Fk      - (n×n×N double) discrete dynamics Jacobians
+%   Hk      - (p×p×N double) discrete measurement Jacobians
+%
+% -----
+% NOTE:
+% -----
+%   --> N = number of samples
+%   --> "Fk" and "Hk" are returned to aid observability analyses.
 %
 %==========================================================================
-function [x,P,tsol,rank_Ob,z_pre,z_post] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
+function [x,P,tsol,z_pre,z_post,Fk,Hk] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
     P0,dt,t0,method,wb)
     
     % -------------------------------
@@ -103,7 +110,6 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
     % preallocates arrays
     x = zeros(n,N);
     P = zeros(n,n,N);
-    rank_Ob = zeros(N,1);
     z_pre = zeros(p,N);
     z_post = zeros(p,N);
     Fk = zeros(n,n,N);
@@ -130,29 +136,6 @@ function [x,P,tsol,rank_Ob,z_pre,z_post] = EKFc_sim(f,h,A,C,Q,R,u,y,x0,...
         
     end
     tsol = toc/N;
-
-    % rank of the observability matrix
-    for k = 0:(N-1)
-
-        % index for accessing arrays (switch from 0- to 1-based indexing)
-        kk = k+1;
-
-        % observability at initial sample time
-        if (k == 0)
-            rank_Ob(kk) = rank(obsv(Fk(:,:,1),C(x0,0)));
-
-        % observability at final sample time (set to NaN because control
-        % input will not be known at final sample time)
-        elseif (kk == N-1)
-            rank_Ob(kk) = NaN;
-
-        % observability at all other sample times
-        else
-            rank_Ob(kk) = rank(obsv(Fk(:,:,kk),Hk(:,:,kk)));
-
-        end
-
-    end
 
     % closes waitbar
     if display_waitbar, close(wb); end
