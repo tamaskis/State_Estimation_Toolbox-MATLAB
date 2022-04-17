@@ -27,7 +27,7 @@
 %   t0      - (1×1 double) initial time, t₀
 %   method  - (char) integration method --> 'Euler', 'RK2', 'RK2 Heun', 
 %             'RK2 Ralston', 'RK3', 'RK3 Heun', 'RK3 Ralston', 'SSPRK3',
-%             'RK4', 'RK4 Ralston', 'RK4 3/8' (defaults to 'Euler')
+%             'RK4', 'RK4 Ralston', 'RK4 3/8'
 %
 % -------
 % OUTPUT:
@@ -37,21 +37,29 @@
 %   F_prev  - (n×n double) discrete dynamics Jacobian at previous sample 
 %             time
 %
+% -----
+% NOTE:
+% -----
+%   --> This function makes use of the fact that Fₖ₋₁ = Φ(tₖ,tₖ₋₁).
+%
 %==========================================================================
 function [x_pred,P_pred,F_prev] = EKFc_predict(x_prev,P_prev,u_prev,f,A,...
     Q,k,dt,t0,method)
     
-    % current time
-    t = k2t_num(k,dt,t0);
+    % current sample time
+    tk = k2t_num(k,dt,t0);
+
+    % previous sample time
+    tk_1 = tk-dt;
     
-    % state transition matrix and a priori state estimate at current sample
-    % time
-    [Phi,x_pred] = Af2stm_num(A,f,x_prev,u_prev,t,dt,method);
+    % discrete dynamics Jacobian at previous sample time and a priori state 
+    % estimate at current sample time
+    [F_prev,x_pred] = Af2stm_num(A,f,x_prev,u_prev,tk_1,dt,method);
     
+    % process noise covariance at previous sample time
+    Q_prev = Q(x_prev,u_prev,k-1);
+
     % a priori error covariance at current sample time
-    P_pred = Phi*P_prev*Phi.'+Q(x_prev,u_prev,k-1);
-    
-    % discrete dynamics Jacobian at previous sample time
-    F_prev = Phi;
+    P_pred = F_prev*P_prev*F_prev.'+Q_prev;
 
 end

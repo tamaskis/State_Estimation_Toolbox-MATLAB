@@ -43,21 +43,28 @@ function [xk,Pk,z_pre,z_post,Hk] = EKF_update(x_pred,P_pred,yk,hd,H,R,k)
     
     % discrete measurement Jacobian at current sample time
     Hk = H(x_pred,k);
+
+    % measurement noise covariance at current sample time
+    Rk = R(x_pred,k);
     
     % pre-fit measurement residual (innovation)
     z_pre = yk-hd(x_pred,k);
     
     % pre-fit measurement residual covariance (innovation covariance)
-    S = Hk*P_pred*Hk.'+R(x_pred,k);
+    S = Hk*P_pred*Hk.'+Rk;
     
     % Kalman gain
     Kk = P_pred*Hk.'/S;
 
+    % auxiliary matrix for use with Joseph's formula
+    Jk = eye(n)-Kk*Hk;
+
     % a posteriori state estimate at current sample time
     xk = x_pred+Kk*z_pre;
     
-    % a posteriori error covariance at current sample time
-    Pk = (eye(n)-Kk*Hk)*P_pred;
+    % a posteriori error covariance at current sample time (Joseph's
+    % formula)
+    Pk = Jk*P_pred*Jk.'+Kk*Rk*Kk.';
     
     % post-fit measurement residual
     z_post = yk-hd(xk,k);
