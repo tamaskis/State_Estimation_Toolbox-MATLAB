@@ -5,7 +5,7 @@
 %   [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,hd,R,k)
 %
 % Author: Tamas Kis
-% Last Update: 2022-04-16
+% Last Update: 2022-03-31
 %
 %--------------------------------------------------------------------------
 %
@@ -34,18 +34,32 @@
 %==========================================================================
 function [xk,Pk,z_pre,z_post] = UKF_update(x_pred,P_pred,yk,hd,R,k)
     
-    % function handle for nonlinearity
-    g = @(x) hd(x,k);
+    % state (n) and measurement (p) dimensions
+    n = length(x_pred);
+    p = length(yk);
+
+    % sigma points from predicted state estimate statistics
+    [Chi,w] = UT(x_pred,P_pred);
     
-    % predicted measurement, uncorrected measurement error covariance, and 
-    % state/measurement cross covariance at current sample time
-    [y_pred,Py,Pxy] = unscented_transform(x_pred,P_pred,g,true);
+    % passing sigma points through nonlinear measurement equation
+    Y = zeros(p,2*n+1);
+    y_pred = zeros(p,1);
+    for i = 1:(2*n+1)
+        Y(:,i) = hd(Chi(:,i),k);
+        y_pred = y_pred+w(i)*Y(:,i);
+    end
     
     % pre-fit measurement residual (innovation)
     z_pre = yk-y_pred;
     
-    % adds effect of measurement noise to correct the measurement error 
-    % covariance
+    % covariance of predicted measurement and cross covariance between
+    % predicted state and predicted measurement
+    Py = zeros(p,p);
+    Pxy = zeros(n,p);
+    for i = 1:(2*n+1)
+        Py = Py+w(i)*(Y(:,i)-y_pred)*(Y(:,i)-y_pred)';
+        Pxy = Pxy+w(i)*(Chi(:,i)-x_pred)*(Y(:,i)-y_pred)';
+    end
     Py = Py+R(x_pred,k);
     
     % Kalman gain

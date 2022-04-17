@@ -29,15 +29,22 @@
 %
 %==========================================================================
 function [x_pred,P_pred] = UKF_predict(x_prev,P_prev,u_prev,fd,Q,k)
-
-    % function handle for nonlinearity
-    g = @(x) fd(x,u_prev,k-1);
-
-    % a priori state estimate and uncorrected error covariance at current 
-    % sample time
-    [x_pred,P_tilde] = unscented_transform(x_prev,P_prev,g);
     
-    % adds effect of process noise to correct the error covariance
+    % state dimension
+    n = length(x_prev);
+
+    % sigma points from state estimate statistics at previous sample time
+    [Chi,w] = UT(x_prev,P_prev);
+    
+    % passing sigma points through nonlinear dynamics
+    for i = 1:(2*n+1)
+        Chi(:,i) = fd(Chi(:,i),u_prev,k-1);
+    end
+    
+    % a priori state estimate at current sample time
+    [x_pred,P_tilde] = iUT(Chi,w);
+    
+    % a priori error covariance at current sample time
     P_pred = P_tilde+Q(x_prev,u_prev,k-1);
     
 end
