@@ -28,7 +28,7 @@
 %   --> The covariance (Σ) must be positive semidefinite.
 %
 %==========================================================================
-function X = randmvn(mu,Sigma,N)
+function x = randmvn(mu,Sigma,N)
     
     % defaults sample size to 1
     if (nargin < 3) || isempty(N)
@@ -48,6 +48,6 @@ function X = randmvn(mu,Sigma,N)
     mu = repmat(mu,1,N);
     
     % converts to Gaussian distribution with given parameters
-    X = Sigma_sqrt*z+mu;
+    x = Sigma_sqrt*z+mu;
     
 end

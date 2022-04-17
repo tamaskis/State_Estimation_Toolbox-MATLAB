@@ -1,12 +1,12 @@
 %==========================================================================
 %
-% transform_linearized  Linearized transformation for passing a Gaussian 
+% linearized_transform  Linearized transformation for passing a Gaussian 
 % through a nonlinearity.
 %
-%   [mu_y,Sigma_yy] = transform_linearized(mu_x,Sigma_xx,f)
+%   [mu_y,Sigma_yy] = linearized_transform(mu_x,Sigma_xx,f)
 %
 % Author: Tamas Kis
-% Last Update: 2022-04-15
+% Last Update: 2022-04-16
 %
 %--------------------------------------------------------------------------
 %
@@ -27,7 +27,7 @@
 %   Sigma_yy    - (m×m double) covariance of Y
 %
 %==========================================================================
-function [mu_y,Sigma_yy] = transform_linearized(mu_x,Sigma_xx,f,J)
+function [mu_y,Sigma_yy] = linearized_transform(mu_x,Sigma_xx,f,J)
     
     % evaluates Jacobian of nonlinear transformation at the mean of x
     A = J(mu_x);
@@ -37,5 +37,5 @@ function [mu_y,Sigma_yy] = transform_linearized(mu_x,Sigma_xx,f,J)
     
     % approximates covariance of Y via linearization
     Sigma_yy = A*Sigma_xx*A.';
-
+    
 end
