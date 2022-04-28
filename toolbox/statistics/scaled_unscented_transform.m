@@ -1,11 +1,12 @@
 %==========================================================================
 %
-% unscented_transform  Unscented transformation for passing a distribution
-% through a nonlinearity.
+% scaled_unscented_transform  Scaled unscented transformation for passing a
+% distribution through a nonlinearity.
 %
-%   [mu_y,Sigma_yy] = unscented_transform(mu_x,Sigma_xx,f)
-%   [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,f,true)
-%   [__] = unscented_transform(__,kappa)
+%   [mu_y,Sigma_yy] = scaled_unscented_transform(mu_x,Sigma_xx,f)
+%   [mu_y,Sigma_yy,Sigma_xy] = scaled_unscented_transform(mu_x,Sigma_xx,...
+%       f,true)
+%   [__] = scaled_unscented_transform(__,alpha,beta,kappa)
 %
 % Author: Tamas Kis
 % Last Update: 2022-04-27
@@ -22,8 +23,12 @@
 %   cross_covar - (1×1 logical) (OPTIONAL) input as "true" if cross 
 %                 covariance of X and Y should be calculated) (defaults to 
 %                 false)
-%   kappa       - (1×1 double) (OPTIONAL) scaling parameter, κ (defaults to
-%                 κ = 3-n)
+%   alpha       - (1×1 double) (OPTIONAL) spread parameter, α (defaults to
+%                 10⁻³)
+%   beta        - (1×1 double) (OPTIONAL) distribution parameter, β 
+%                 (defaults to 2, assuming X is Gaussian)
+%   kappa       - (1×1 double) (OPTIONAL) secondary scaling parameter, κ 
+%                 (defaults to 0)
 %
 % -------
 % OUTPUT:
@@ -33,15 +38,22 @@
 %   Sigma_xy    - (n×m double) cross covariance of X and Y
 %
 %==========================================================================
-function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,f,...
-    cross_covar,kappa)
+function [mu_y,Sigma_yy,Sigma_xy] = scaled_unscented_transform(mu_x,...
+    Sigma_xx,f,cross_covar,alpha,beta,kappa)
     
-    % dimension of X
-    n = length(mu_x);
-    
-    % defaults "kappa" to 3-n if not input
-    if (nargin < 5) || isempty(kappa)
-        kappa = 3-n;
+    % defaults "alpha" to 10⁻³ if not input
+    if (nargin < 5) || isempty(alpha)
+        alpha = 1e-3;
+    end
+
+    % defaults "beta" to 2 if not input
+    if (nargin < 6) || isempty(beta)
+        beta = 2;
+    end
+
+    % defaults "kappa" to 0 if not input
+    if (nargin < 7) || isempty(kappa)
+        kappa = 0;
     end
     
     % defaults "cross_covar" to "false" if not input
@@ -53,11 +65,17 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,f,...
     % Generating sigma points.
     % ------------------------
     
+    % dimension of X
+    n = length(mu_x);
+    
     % square root of covariance matrix (Σ¹ᐟ²) via Cholesky decomposition
     Sigma_sqrt = chol(Sigma_xx)';
     
+    % scaling parameter
+    lambda = alpha^2*(n+kappa)-n;
+    
     % S matrix
-    S = sqrt(n+kappa)*Sigma_sqrt;
+    S = sqrt(n+lambda)*Sigma_sqrt;
     
     % n×n matrix storing mean of X in each column
     M = repmat(mu_x,1,n);
@@ -88,8 +106,11 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,f,...
     % ----------------------------------------------------------
     
     % determines the weights
-    w0 = kappa/(n+kappa);
-    w = 1/(2*(n+kappa));
+    w0 = lambda/(n+lambda);
+    w = 1/(2*(n+lambda));
+    
+    % γ parameter
+    gamma = 1-alpha^2+beta;
     
     % approximates mean of Y using sample mean
     mu_y =  w0*y0;
@@ -98,11 +119,7 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,f,...
     end
     
     % approximates covariance of Y using sample covariance
-    if (kappa >= 0)
-        Sigma_yy = w0*(y0-mu_y)*(y0-mu_y).';
-    else
-        Sigma_yy = zeros(m,m);
-    end
+    Sigma_yy = (w0+gamma)*(y0-mu_y)*(y0-mu_y).';
     for i = 1:(2*n)
         Sigma_yy = Sigma_yy+w*(y(:,i)-mu_y)*(y(:,i)-mu_y).';
     end
