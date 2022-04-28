@@ -7,7 +7,7 @@
 %   [mu_y,Sigma_yy] = monte_carlo_transform(mu_x,Sigma_xx,f,N)
 %
 % Author: Tamas Kis
-% Last Update: 2022-04-16
+% Last Update: 2022-04-27
 %
 %--------------------------------------------------------------------------
 %
@@ -26,6 +26,11 @@
 %   mu_y        - (m×1 double) mean of Y
 %   Sigma_yy    - (m×m double) covariance of Y
 %
+% -----
+% NOTE:
+% -----
+%   --> This implementation assumes that X is a Gaussian random vector.
+%
 %==========================================================================
 function [mu_y,Sigma_yy] = monte_carlo_transform(mu_x,Sigma_xx,f,N)
     
@@ -35,7 +40,7 @@ function [mu_y,Sigma_yy] = monte_carlo_transform(mu_x,Sigma_xx,f,N)
     end
     
     % generate random samples of X
-    x = mvnrnd(mu_x,Sigma_xx,N).';
+    x = randmvn(mu_x,Sigma_xx,N);
     
     % dimension of Y
     m = length(f(mu_x));

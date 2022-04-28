@@ -46,15 +46,15 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
         lambda = 2;
     end
     
-    % -------------------------
-    % Calculating sigma points.
-    % -------------------------
+    % ------------------------
+    % Generating sigma points.
+    % ------------------------
     
     % dimension of X
     n = length(mu_x);
     
     % preallocates arrays to store sigma points and weights
-    chi = zeros(n,2*n+1);
+    x = zeros(n,2*n+1);
     W = zeros(2*n+1,1);
     
     % square root of covariance matrix (Σ¹ᐟ²) via Cholesky decomposition
@@ -64,11 +64,11 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     S = sqrt(lambda+n)*Sigma_sqrt;
     
     % obtains the sigma points and their corresponding weights
-    chi(:,1) = mu_x;
+    x(:,1) = mu_x;
     W(1) = lambda/(lambda+n);
     for i = 2:(n+1)
-        chi(:,i) = mu_x+S(:,i-1);
-        chi(:,i+n) = mu_x-S(:,i-1);
+        x(:,i) = mu_x+S(:,i-1);
+        x(:,i+n) = mu_x-S(:,i-1);
         W(i) = 1/(2*(lambda+n));
         W(i+n) = 1/(2*(lambda+n));
     end
@@ -78,20 +78,20 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     % ------------------------------------------
     
     % passes 1st sigma point through nonlinearity
-    y1 = f(chi(:,1));
+    y1 = f(x(:,1));
     
     % dimension of Y
     m = length(Y1);
     
-    % preallocates array to store samples of y
+    % preallocates array to store samples of Y
     y = zeros(m,2*n+1);
     
-    % stores first sample of y
+    % stores first sample of Y
     y(:,1) = y1;
     
     % passes sigma points through the nonlinearity
     for i = 2:(2*n+1)
-        y(:,i) = f(chi(:,i));
+        y(:,i) = f(x(:,i));
     end
 
     % -------------------------------------
@@ -118,7 +118,7 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     if cross_covar
         Sigma_xy = zeros(n,m);
         for i = 1:(2*n+1)
-            Sigma_xy = Sigma_xy+W(i)*(chi(:,i)-mu_x)*(y(:,i)-mu_y).';
+            Sigma_xy = Sigma_xy+W(i)*(x(:,i)-mu_x)*(y(:,i)-mu_y).';
         end
     end
     
