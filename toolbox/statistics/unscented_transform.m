@@ -1,6 +1,6 @@
 %==========================================================================
 %
-% unscented_transform  Unscented transformation for passing a Gaussian 
+% unscented_transform  Unscented transformation for passing a distribution
 % through a nonlinearity.
 %
 %   [mu_y,Sigma_yy] = unscented_transform(mu_x,Sigma_xx,f)
@@ -39,9 +39,9 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     % dimension of X
     n = length(mu_x);
     
-    % defaults "kappa" to 2 if not input
+    % defaults "kappa" to 3-n if not input
     if (nargin < 4) || isempty(kappa)
-        kappa = 2;
+        kappa = 3-n;
     end
     
     % defaults "cross_covar" to "false" if not input
@@ -57,7 +57,7 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     Sigma_sqrt = chol(Sigma_xx)';
     
     % S matrix
-    S = sqrt(kappa+n)*Sigma_sqrt;
+    S = sqrt(n+kappa)*Sigma_sqrt;
     
     % n×n matrix storing mean of X in each column
     M = repmat(mu_x,1,n);
@@ -98,7 +98,7 @@ function [mu_y,Sigma_yy,Sigma_xy] = unscented_transform(mu_x,Sigma_xx,...
     end
     
     % approximates covariance of Y using sample covariance
-    if (kappa > 0)
+    if (kappa >= 0)
         Sigma_yy = w0*(y0-mu_y)*(y0-mu_y).';
     else
         Sigma_yy = zeros(m,m);

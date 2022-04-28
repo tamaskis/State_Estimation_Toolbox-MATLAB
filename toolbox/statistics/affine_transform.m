@@ -5,7 +5,7 @@
 %   [mu_y,Sigma_yy] = affine_transform(mu_x,Sigma_xx,A,b)
 %
 % Author: Tamas Kis
-% Last Update: 2022-04-16
+% Last Update: 2022-04-27
 %
 %--------------------------------------------------------------------------
 %

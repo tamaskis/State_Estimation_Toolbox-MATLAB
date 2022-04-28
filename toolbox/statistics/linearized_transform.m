@@ -1,12 +1,12 @@
 %==========================================================================
 %
-% linearized_transform  Linearized transformation for passing a Gaussian 
-% through a nonlinearity.
+% linearized_transform  Linearized transformation for passing a
+% distribution through a nonlinearity.
 %
 %   [mu_y,Sigma_yy] = linearized_transform(mu_x,Sigma_xx,f)
 %
 % Author: Tamas Kis
-% Last Update: 2022-04-16
+% Last Update: 2022-04-27
 %
 %--------------------------------------------------------------------------
 %
