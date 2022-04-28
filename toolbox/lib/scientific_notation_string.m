@@ -6,8 +6,10 @@
 %   str = scientific_notation_string(x)
 %   str = scientific_notation_string(x,n)
 %
-% Author: Tamas Kis
-% Last Update: 2021-12-09
+% Copyright © 2022 Tamas Kis
+% Last Update: 2022-04-16
+% Website: https://tamaskis.github.io
+% Contact: tamas.a.kis@outlook.com
 %
 %--------------------------------------------------------------------------
 %
@@ -15,13 +17,13 @@
 % INPUT:
 % ------
 %   x       - (1×1 double) number
-%   n       - (OPTIONAL) (1×1 double) number of digits after decimal point 
+%   n       - (1×1 double) (OPTIONAL) number of digits after decimal point 
 %             (i.e. precision)
 %
 % -------
 % OUTPUT:
 % -------
-%   str     - (string) string storing number in scientific notation, 
+%   str     - (1×1 string) string storing number in scientific notation, 
 %             formatted to be used with LaTeX interpreter (but does NOT 
 %             include leading and trailing "$")
 %   
