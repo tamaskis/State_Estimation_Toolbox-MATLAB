@@ -44,7 +44,7 @@ function x = randmvn(mu,Sigma,N)
     % N random samples from standard normal distribution
     z = randn(n,N);
     
-    % n-by-N matrix storing mean in each column
+    % n×N matrix storing mean in each column
     mu = repmat(mu,1,N);
     
     % converts to Gaussian distribution with given parameters
