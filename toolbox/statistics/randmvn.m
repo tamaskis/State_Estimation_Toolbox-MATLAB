@@ -1,6 +1,6 @@
 %==========================================================================
 %
-% randmvn  Random samples from a multivariate normal distribution.
+% randmvn Generate random samples from a multivariate normal distribution.
 %
 %   x = randmvn(mu,Sigma)
 %   x = randmvn(mu,Sigma,N)
@@ -30,7 +30,7 @@
 %==========================================================================
 function x = randmvn(mu,Sigma,N)
     
-    % defaults sample size to 1
+    % defaults sample size to 1 if not input
     if (nargin < 3) || isempty(N)
         N = 1;
     end

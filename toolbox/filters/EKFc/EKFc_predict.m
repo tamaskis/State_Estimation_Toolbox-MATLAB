@@ -48,7 +48,7 @@ function [x_pred,P_pred,F_prev] = EKFc_predict(x_prev,P_prev,u_prev,f,A,...
     
     % current sample time
     tk = k2t_num(k,dt,t0);
-
+    
     % previous sample time
     tk_1 = tk-dt;
     
@@ -58,8 +58,8 @@ function [x_pred,P_pred,F_prev] = EKFc_predict(x_prev,P_prev,u_prev,f,A,...
     
     % process noise covariance at previous sample time
     Q_prev = Q(x_prev,u_prev,k-1);
-
+    
     % a priori error covariance at current sample time
     P_pred = F_prev*P_prev*F_prev.'+Q_prev;
-
+    
 end
